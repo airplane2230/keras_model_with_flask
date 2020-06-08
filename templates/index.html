@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>
+        MNIST_EXAMPLE
+    </title>
+</head>
+<script async src="https://docs.opencv.org/3.4/opencv.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
+<script>
+    function clear(){
+        console.log("clear!");
+        canvas = document.getElementById("myCanvas");
+        context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.beginPath();
+
+        context.restore();
+    }
+
+    function check(){
+        console.log("check");
+        canvas = document.getElementById("myCanvas");
+        context = canvas.getContext("2d");
+
+        console.log(context);
+        console.log(canvas.toDataURL("image/png"));
+    }
+
+    function predict(){
+        canvas = document.getElementById("myCanvas");
+        context = canvas.getContext("2d");
+
+        var imgURL = canvas.toDataURL("image/png");
+
+        $.ajax({
+            url: "/doPredict",
+            type: "POST",
+            data:{"img": imgURL},
+            success: function(response){
+                console.log("====SUCCESS====");
+            },
+            error: function(response){
+                console.log("====ERROR====");
+            }
+        });
+    }
+
+    function download(){
+        canvas = document.getElementById("myCanvas");
+        var link = document.getElementById('link');
+        link.setAttribute('download', 'example.png');
+        link.setAttribute('href', canvas.toDataURL("image/png").replace("image/octet-stream"));
+        console.log(canvas.toDataURL("image/png").replace("image/octet-stream"));
+        link.click();
+    }
+</script>
+
+<body onload="init()">
+    <div>
+        <div>
+            <canvas id="myCanvas" style="background:white;width:224;height:224;border: 1px solid red"></canvas>
+        </div>
+        <div>
+            <button id="clear">지우기</button>
+            <button id="predict">predict</button>
+            <button id="check">check</button>
+        </div>
+            <button id="download">download</button>
+            <a id="link"></a>
+    </div>
+<script>
+    var canvas, context;
+
+    function init(){
+        canvas = document.getElementById("myCanvas");
+        context = canvas.getContext("2d");
+
+        context.lineWidth = 2;
+        context.strokeStyle = "black";
+
+        canvas.addEventListener("mousemove", function (e) { move(e) }, false);
+        canvas.addEventListener("mousedown", function (e) { down(e) }, false);
+        canvas.addEventListener("mouseup", function (e) { up(e) }, false);
+        canvas.addEventListener("mouseout", function (e) { out(e) }, false);
+
+        document.getElementById("clear").addEventListener("click", clear);
+        document.getElementById("check").addEventListener("click", check);
+        document.getElementById("predict").addEventListener("click", predict);
+        document.getElementById("download").addEventListener("click", download);
+    }
+
+    var startX = 0;
+    var startY = 0;
+    var drawing = false;
+
+
+
+    function draw(curX, curY){
+        context.beginPath();
+        context.moveTo(startX, startY);
+        context.lineTo(curX, curY);
+        context.stroke();
+    }
+
+    function down(e){
+        startX = e.clinetX - canvas.offsetLeft;
+        startY = e.offsetY;
+        drawing = true;
+    }
+
+    function up(e){
+        drawing = false;
+    }
+
+    function move(e){
+        if(!drawing) return;
+        var curX = e.clientX - canvas.offsetLeft;
+        var curY = e.clientY - canvas.offsetTop;
+        draw(curX, curY);
+        startX = curX; startY = curY;
+    }
+
+    function out(e){
+        drawing = false;
+    }
+</script>
+</body>
+</html>
