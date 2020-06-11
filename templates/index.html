@@ -55,6 +55,37 @@
         console.log(canvas.toDataURL("image/png").replace("image/octet-stream"));
         link.click();
     }
+
+    function sendImage(){
+        var $canvas = document.createElement('canvas');
+        var imgDataUrl = $canvas.toDataURL('image/png');
+
+        var decoded_img = atob(imgDataUrl.split(',')[1]);
+        var array = [];
+        for(var i = 0; i<decoded_img.length; i++){
+            array.push(decoded_img.charCodeAt(i));
+        }
+
+        var img = new Blob([new Uint8Array(array)], {type: 'image/png'});
+        var formData = new FormData();
+        formData.append("image", img);
+        formData.append("url", imgDataUrl);
+
+        $.ajax({
+            url: "/doPredict",
+            type: "POST",
+            data:formData,
+            processData: false,
+            contentType: false,
+            success: function(response){
+                console.log("====SUCCESS====");
+            },
+            error: function(response){
+                console.log("====ERROR====");
+            }
+        });
+    }
+
 </script>
 
 <body onload="init()">
@@ -87,15 +118,13 @@
 
         document.getElementById("clear").addEventListener("click", clear);
         document.getElementById("check").addEventListener("click", check);
-        document.getElementById("predict").addEventListener("click", predict);
+        document.getElementById("predict").addEventListener("click", sendImage);
         document.getElementById("download").addEventListener("click", download);
     }
 
     var startX = 0;
     var startY = 0;
     var drawing = false;
-
-
 
     function draw(curX, curY){
         context.beginPath();
