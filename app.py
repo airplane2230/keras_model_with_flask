@@ -8,24 +8,35 @@ import base64
 import re
 import urllib.request
 
+from tensorflow.keras.models import load_model
+
 app = Flask(__name__)
 
-@app.route('/doPredict', methods = ["POST"])
+def get_model():
+    global model
+    model = load_model('./saved_model/mnist_model.h5')
+
+@app.route('/doPredict', methods = ["POST", "GET"])
 def doPredict():
+    global model
+
     img_url = request.form.get('url')
     img_url = img_url.split(',')[1]
 
     decoded_img = base64.b64decode(img_url)
-    with open("./test.png", "wb") as save_file:
+
+    with open("./test2.png", "wb") as save_file:
         save_file.write(decoded_img)
 
-    # print(np.fromstring(img, dtype = np.uint8).shape)
-    # with open('./img.png', 'wb') as save_file:
-    #     save_file.write(urllib.request.urlopen(img).read())
+    img = cv2.imread('./test2.png',cv2.IMREAD_GRAYSCALE)
+    img = cv2.resize(img, (28, 28))[..., np.newaxis]
+    img = img / 255.
+    img = np.expand_dims(img, 0)
+    cv2.imwrite('./write.png', img)
 
-    # data = request.values['img'].split(',')[1]
-    # decoded_data = base64.b64decode(data)
-    # np_img = np.fromstring(decoded_data, dtype=np.uint8)
+    result = model.predict(img)
+
+    print(np.argmax(result, axis=-1))
 
     return ""
 
@@ -34,5 +45,5 @@ def template():
     return render_template('index.html')
 
 if __name__ == '__main__':
+    get_model()
     app.run(port=5000)
-    app.debug = True

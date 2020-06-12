@@ -57,19 +57,10 @@
     }
 
     function sendImage(){
-        var $canvas = document.createElement('canvas');
-        var imgDataUrl = $canvas.toDataURL('image/png');
-
-        var decoded_img = atob(imgDataUrl.split(',')[1]);
-        var array = [];
-        for(var i = 0; i<decoded_img.length; i++){
-            array.push(decoded_img.charCodeAt(i));
-        }
-
-        var img = new Blob([new Uint8Array(array)], {type: 'image/png'});
+        var canvas = document.getElementById('myCanvas');
         var formData = new FormData();
-        formData.append("image", img);
-        formData.append("url", imgDataUrl);
+
+        formData.append("url", canvas.toDataURL());
 
         $.ajax({
             url: "/doPredict",
