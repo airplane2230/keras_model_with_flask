@@ -7,6 +7,8 @@ import urllib
 import base64
 import re
 import urllib.request
+import io
+from PIL import Image
 
 from tensorflow.keras.models import load_model
 
@@ -24,18 +26,27 @@ def doPredict():
     img_url = img_url.split(',')[1]
 
     decoded_img = base64.b64decode(img_url)
+    bytesImage = io.BytesIO(decoded_img)
+    img = Image.open(bytesImage)
+    img = img.resize((28, 28), Image.LANCZOS)
+    img = img.convert('1')
+    img_arr = np.asarray(img)[..., np.newaxis]
+    img_arr = img_arr / 255.
+    img_arr = np.expand_dims(img_arr, 0)
 
-    with open("./test2.png", "wb") as save_file:
+    with open("./results/userImage.png", "wb") as save_file:
         save_file.write(decoded_img)
 
-    img = cv2.imread('./test2.png',cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread('./results/userImage.png',cv2.IMREAD_GRAYSCALE)
+    cv2.imwrite('./results/readImage.png', img)
+
     img = cv2.resize(img, (28, 28))[..., np.newaxis]
     img = img / 255.
     img = np.expand_dims(img, 0)
-    cv2.imwrite('./write.png', img)
+    cv2.imwrite('./results/writeImage.png', img[0])
 
-    result = model.predict(img)
-
+    result = model.predict(img_arr)
+    print(result)
     print(np.argmax(result, axis=-1))
 
     return ""

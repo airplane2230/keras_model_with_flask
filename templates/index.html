@@ -9,6 +9,13 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 
 <script>
+    function contextInit(context){
+        context.fillStyle = "white";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.lineWidth = 3;
+        context.strokeStyle = "black";
+    }
+
     function clear(){
         console.log("clear!");
         canvas = document.getElementById("myCanvas");
@@ -17,20 +24,12 @@
         context.beginPath();
 
         context.restore();
-    }
 
-    function check(){
-        console.log("check");
-        canvas = document.getElementById("myCanvas");
-        context = canvas.getContext("2d");
-
-        console.log(context);
-        console.log(canvas.toDataURL("image/png"));
+        contextInit(context);
     }
 
     function predict(){
         canvas = document.getElementById("myCanvas");
-        context = canvas.getContext("2d");
 
         var imgURL = canvas.toDataURL("image/png");
 
@@ -82,12 +81,11 @@
 <body onload="init()">
     <div>
         <div>
-            <canvas id="myCanvas" style="background:white;width:224;height:224;border: 1px solid red"></canvas>
+            <canvas id="myCanvas" width="280" height="280" style="border: 1px solid red"></canvas>
         </div>
         <div>
             <button id="clear">지우기</button>
             <button id="predict">predict</button>
-            <button id="check">check</button>
         </div>
             <button id="download">download</button>
             <a id="link"></a>
@@ -98,9 +96,7 @@
     function init(){
         canvas = document.getElementById("myCanvas");
         context = canvas.getContext("2d");
-
-        context.lineWidth = 2;
-        context.strokeStyle = "black";
+        contextInit(context);
 
         canvas.addEventListener("mousemove", function (e) { move(e) }, false);
         canvas.addEventListener("mousedown", function (e) { down(e) }, false);
@@ -108,7 +104,6 @@
         canvas.addEventListener("mouseout", function (e) { out(e) }, false);
 
         document.getElementById("clear").addEventListener("click", clear);
-        document.getElementById("check").addEventListener("click", check);
         document.getElementById("predict").addEventListener("click", sendImage);
         document.getElementById("download").addEventListener("click", download);
     }
